@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { showSuccess, showError } from "@/utils/toast";
-import { Copy, Trash2 } from "lucide-react";
+import { Copy, Trash2, Download } from "lucide-react";
 import JsonSyntaxHighlighter from "@/components/JsonSyntaxHighlighter";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 
@@ -39,6 +39,23 @@ const JsonBeautifier = () => {
   const handleClear = () => {
     setInputJson("");
     setOutputJson("");
+  };
+
+  const handleDownload = () => {
+    if (!outputJson) {
+      showError("Tidak ada output untuk diunduh.");
+      return;
+    }
+    const blob = new Blob([outputJson], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "beautified.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showSuccess("File JSON berhasil diunduh!");
   };
 
   return (
@@ -84,9 +101,13 @@ const JsonBeautifier = () => {
           </Card>
         </div>
 
-        <div className="flex justify-center gap-4 mt-8">
+        <div className="flex justify-center items-center flex-wrap gap-4 mt-8">
           <Button onClick={handleBeautify} size="lg">
             Per-cantik JSON
+          </Button>
+          <Button onClick={handleDownload} variant="outline" size="lg" disabled={!outputJson}>
+            <Download className="mr-2 h-4 w-4" />
+            Unduh
           </Button>
           <Button onClick={handleClear} variant="destructive" size="lg">
             <Trash2 className="mr-2 h-4 w-4" />
