@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { showSuccess, showError } from "@/utils/toast";
 import { Copy, Trash2 } from "lucide-react";
+import JsonSyntaxHighlighter from "@/components/JsonSyntaxHighlighter";
 
 const JsonBeautifier = () => {
   const [inputJson, setInputJson] = useState("");
@@ -75,9 +76,7 @@ const JsonBeautifier = () => {
           </CardHeader>
           <CardContent>
             <div className="bg-muted rounded-md p-4 min-h-[400px] overflow-auto">
-              <pre className="text-sm font-mono whitespace-pre-wrap">
-                <code>{outputJson || "Output akan muncul di sini..."}</code>
-              </pre>
+              <JsonSyntaxHighlighter jsonString={outputJson} />
             </div>
           </CardContent>
         </Card>
