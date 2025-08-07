@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { showSuccess, showError } from "@/utils/toast";
-import { Copy, Trash2, Download } from "lucide-react";
+import { Copy, Trash2, Download, Zap } from "lucide-react";
 import JsonSyntaxHighlighter from "@/components/JsonSyntaxHighlighter";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 
@@ -28,6 +28,22 @@ const JsonBeautifier = () => {
       const beautifiedJson = JSON.stringify(parsedJson, null, 2);
       setOutputJson(beautifiedJson);
       showSuccess("JSON berhasil dipercantik!");
+    } catch (error) {
+      setOutputJson("");
+      showError("Format JSON tidak valid. Silakan periksa kembali.");
+    }
+  };
+
+  const handleMinify = () => {
+    if (!inputJson.trim()) {
+      showError("Input JSON tidak boleh kosong.");
+      return;
+    }
+    try {
+      const parsedJson = JSON.parse(inputJson);
+      const minifiedJson = JSON.stringify(parsedJson);
+      setOutputJson(minifiedJson);
+      showSuccess("JSON berhasil diminify!");
     } catch (error) {
       setOutputJson("");
       showError("Format JSON tidak valid. Silakan periksa kembali.");
@@ -112,9 +128,9 @@ const JsonBeautifier = () => {
     <div className="container mx-auto p-4 md:p-8 flex flex-col min-h-screen">
       <main className="flex-grow">
         <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold">JSON Beautifier</h1>
+          <h1 className="text-4xl font-bold">JSON Beautifier & Minifier</h1>
           <p className="text-muted-foreground mt-2">
-            Tempel JSON mentah Anda di bawah ini untuk memformatnya agar mudah dibaca.
+            Tempel JSON Anda untuk memformat, meringkas, dan mengonversinya.
           </p>
         </header>
 
@@ -135,7 +151,7 @@ const JsonBeautifier = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Output yang Dipercantik</CardTitle>
+              <CardTitle>Output</CardTitle>
               {outputJson && (
                 <Button variant="ghost" size="icon" onClick={handleCopy}>
                   <Copy className="h-4 w-4" />
@@ -154,6 +170,10 @@ const JsonBeautifier = () => {
         <div className="flex justify-center items-center flex-wrap gap-4 mt-8">
           <Button onClick={handleBeautify} size="lg">
             Per-cantik JSON
+          </Button>
+          <Button onClick={handleMinify} size="lg" variant="outline">
+            <Zap className="mr-2 h-4 w-4" />
+            Minify JSON
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
