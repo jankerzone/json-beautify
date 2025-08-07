@@ -1,7 +1,14 @@
 import { useState } from "react";
+import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { showSuccess, showError } from "@/utils/toast";
 import { Copy, Trash2, Download } from "lucide-react";
 import JsonSyntaxHighlighter from "@/components/JsonSyntaxHighlighter";
@@ -41,21 +48,64 @@ const JsonBeautifier = () => {
     setOutputJson("");
   };
 
-  const handleDownload = () => {
+  const handleDownload = (format: "json" | "csv" | "xlsx") => {
     if (!outputJson) {
       showError("Tidak ada output untuk diunduh.");
       return;
     }
-    const blob = new Blob([outputJson], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "beautified.json";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showSuccess("File JSON berhasil diunduh!");
+
+    let parsedJson;
+    try {
+      parsedJson = JSON.parse(outputJson);
+    } catch (e) {
+      showError("JSON tidak valid untuk konversi.");
+      return;
+    }
+
+    if (format === "json") {
+      const blob = new Blob([outputJson], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "beautified.json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showSuccess("File JSON berhasil diunduh!");
+    } else if (format === "csv" || format === "xlsx") {
+      if (!Array.isArray(parsedJson) || parsedJson.length === 0) {
+        showError(`Hanya JSON berbentuk array objek yang bisa dikonversi ke ${format.toUpperCase()}.`);
+        return;
+      }
+
+      if (format === "csv") {
+        const headers = Object.keys(parsedJson[0]);
+        const csvRows = [
+          headers.join(","),
+          ...parsedJson.map((row) =>
+            headers
+              .map((header) => JSON.stringify(row[header], (_, value) => (value === null ? "" : value)))
+              .join(",")
+          ),
+        ];
+        const csvString = csvRows.join("\n");
+        const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "data.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+        showSuccess("File CSV berhasil diunduh!");
+      } else { // xlsx
+        const worksheet = XLSX.utils.json_to_sheet(parsedJson);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+        XLSX.writeFile(workbook, "data.xlsx");
+        showSuccess("File XLSX berhasil diunduh!");
+      }
+    }
   };
 
   return (
@@ -105,10 +155,19 @@ const JsonBeautifier = () => {
           <Button onClick={handleBeautify} size="lg">
             Per-cantik JSON
           </Button>
-          <Button onClick={handleDownload} variant="outline" size="lg" disabled={!outputJson}>
-            <Download className="mr-2 h-4 w-4" />
-            Unduh
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="lg" disabled={!outputJson}>
+                <Download className="mr-2 h-4 w-4" />
+                Unduh
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onSelect={() => handleDownload("json")}>JSON</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => handleDownload("csv")}>CSV</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => handleDownload("xlsx")}>XLSX</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button onClick={handleClear} variant="destructive" size="lg">
             <Trash2 className="mr-2 h-4 w-4" />
             Bersihkan
