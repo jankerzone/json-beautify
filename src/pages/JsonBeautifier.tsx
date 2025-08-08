@@ -90,8 +90,16 @@ const JsonBeautifier = () => {
       URL.revokeObjectURL(url);
       showSuccess("File JSON berhasil diunduh!");
     } else if (format === "csv" || format === "xlsx") {
-      if (!Array.isArray(parsedJson) || parsedJson.length === 0) {
-        showError(`Hanya JSON berbentuk array objek yang bisa dikonversi ke ${format.toUpperCase()}.`);
+      if (
+        !Array.isArray(parsedJson) ||
+        parsedJson.length === 0 ||
+        typeof parsedJson[0] !== "object" ||
+        parsedJson[0] === null ||
+        Array.isArray(parsedJson[0])
+      ) {
+        showError(
+          `Hanya JSON berbentuk array objek yang bisa dikonversi ke ${format.toUpperCase()}.`
+        );
         return;
       }
 
@@ -111,7 +119,9 @@ const JsonBeautifier = () => {
         const a = document.createElement("a");
         a.href = url;
         a.download = "data.csv";
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
         showSuccess("File CSV berhasil diunduh!");
       } else { // xlsx

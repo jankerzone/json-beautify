@@ -11,10 +11,13 @@ const JsonSyntaxHighlighter: React.FC<JsonSyntaxHighlighterProps> = ({ jsonStrin
 
   const highlight = (str: string) => {
     // Basic HTML entity escaping
-    let json = str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const json = str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
     
     // Regex to find and colorize JSON parts
-    return json.replace(/"(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|true|false|null|-?\d+(\.\d+)?([eE][+\-]?\d+)?/g, (match) => {
+    return json.replace(/"(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|true|false|null|-?\d+(\.\d+)?([eE][+-]?\d+)?/g, (match) => {
       let cls = 'text-sky-600 dark:text-sky-400'; // Number
       if (/^"/.test(match)) {
         if (/:$/.test(match)) {
