@@ -12,7 +12,6 @@ import {
 import { showSuccess, showError } from "@/utils/toast";
 import { Copy, Trash2, Download, Zap } from "lucide-react";
 import JsonSyntaxHighlighter from "@/components/JsonSyntaxHighlighter";
-import { MadeWithDyad } from "@/components/made-with-dyad";
 
 const JsonBeautifier = () => {
   const [inputJson, setInputJson] = useState("");
@@ -194,8 +193,8 @@ const JsonBeautifier = () => {
           </Button>
         </div>
       </main>
-      <footer className="mt-auto pt-8">
-        <MadeWithDyad />
+      <footer className="mt-auto pt-8 text-center text-sm text-muted-foreground">
+        <p>JSON Beautifier & Minifier Tool</p>
       </footer>
     </div>
   );
